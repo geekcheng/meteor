@@ -314,13 +314,13 @@ MongoConnection.prototype._startOplogTailing = function (oplogUrl, dbName) {
           return;
         }
 
-        if (!_.isEmpty(pendingSequencers)
-            && _.last(pendingSequencers).ts.greaterThan(ts)) {
-          throw Error("found misordered oplog");
+        var insertAfter = pendingSequencers.length;
+        while (insertAfter - 1 > 0
+               && pendingSequencers[insertAfter - 1].ts.greaterThan(ts)) {
+          insertAfter--;
         }
 
-        pendingSequencers.push({ts: ts,
-                                callback: callback});
+        pendingSequencers.splice(insertAfter, 0, {ts: ts, callback: callback});
       }).run();
     }
   };
